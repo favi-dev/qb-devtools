@@ -1,1 +1,1 @@
-OpenCommand : /Favi.com 
+OpenCommand : /Favi.Dev
