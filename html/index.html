@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favi.Dev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+</head>
+<body>
+    <div id="dev-tools-container" class="hidden">
+        <div class="dev-tools-header">
+            <h1><i class="fas fa-code"></i> Favi.Dev</h1>
+            <div class="server-info">
+                <span id="player-info">Player: N/A</span>
+                <span id="server-time">00:00:00</span>
+            </div>
+            <div class="header-actions">
+                <button id="settings-button" class="header-button"><i class="fas fa-cog"></i></button>
+                <button id="close-button" class="header-button"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="dev-tools-sidebar">
+            <div class="sidebar-item active" data-tab="events">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Events</span>
+            </div>
+            <div class="sidebar-item" data-tab="functions">
+                <i class="fas fa-code"></i>
+                <span>Functions</span>
+            </div>
+            <div class="sidebar-item" data-tab="lua">
+                <i class="fas fa-terminal"></i>
+                <span>Lua Executor</span>
+            </div>
+            <div class="sidebar-item" data-tab="teleport">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>Teleport</span>
+            </div>
+            <div class="sidebar-item" data-tab="debug">
+                <i class="fas fa-bug"></i>
+                <span>Debug</span>
+            </div>
+            <div class="sidebar-item" data-tab="resources">
+                <i class="fas fa-cubes"></i>
+                <span>Resources</span>
+            </div>
+            <div class="sidebar-item" data-tab="logs">
+                <i class="fas fa-list"></i>
+                <span>Logs</span>
+            </div>
+            <div class="sidebar-item" data-tab="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </div>
+
+        <div class="dev-tools-content">
+            <!-- Events Tab -->
+            <div class="tab-content active" id="events-tab">
+                <div class="tab-header">
+                    <h2>Events Monitoring</h2>
+                    <div class="tab-actions">
+                        <button id="start-monitoring" class="action-button"><i class="fas fa-play"></i> Start Monitoring</button>
+                        <button id="stop-monitoring" class="action-button"><i class="fas fa-stop"></i> Stop Monitoring</button>
+                        <button id="clear-events" class="action-button"><i class="fas fa-trash"></i> Clear</button>
+                    </div>
+                </div>
+                <div class="tab-content-inner">
+                    <div class="filter-bar">
+                        <input type="text" id="event-filter" placeholder="Filter events...">
+                        <label>
+                            <input type="checkbox" id="filter-client" checked> Client
+                        </label>
+                        <label>
+                            <input type="checkbox" id="filter-server" checked> Server
+                        </label>
+                    </div>
+                    <div class="events-container">
+                        <table id="events-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Event Name</th>
+                                    <th>Source</th>
+                                    <th>Arguments</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Event data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="event-trigger-container">
+                        <h3>Trigger Event</h3>
+                        <div class="input-group">
+                            <input type="text" id="event-name" placeholder="Event Name">
+                            <select id="event-type">
+                                <option value="client">Client Event</option>
+                                <option value="server">Server Event</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="event-args" placeholder="Arguments (comma separated)">
+                            <button id="trigger-event" class="action-button"><i class="fas fa-bolt"></i> Trigger</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Functions Tab -->
+            <div class="tab-content" id="functions-tab">
+                <div class="tab-header">
+                    <h2>Function Execution</h2>
+                    <div class="tab-actions">
+                        <button id="clear-function-result" class="action-button"><i class="fas fa-trash"></i> Clear Result</button>
+                    </div>
+                </div>
+                <div class="tab-content-inner">
+                    <div class="function-execute-container">
+                        <div class="input-group">
+                            <input type="text" id="function-name" placeholder="Function Name (e.g. QBCore.Functions.GetPlayerData)">
+                            <select id="function-type">
+                                <option value="client">Client Function</option>
+                                <option value="server">Server Function</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="function-args" placeholder="Arguments (comma separated)">
+                            <button id="execute-function" class="action-button"><i class="fas fa-play"></i> Execute</button>
+                        </div>
+                    </div>
+                    <div class="function-result-container">
+                        <h3>Function Result</h3>
+                        <pre id="function-result">// Result will appear here</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lua Executor Tab -->
+            <div class="tab-content" id="lua-tab">
+                <div class="tab-header">
+                    <h2>Lua Code Executor</h2>
+                    <div class="tab-actions">
+                        <select id="lua-context">
+                            <option value="client">Client-side</option>
+                            <option value="server">Server-side</option>
+                        </select>
+                        <button id="execute-lua" class="action-button"><i class="fas fa-play"></i> Execute</button>
+                        <button id="clear-lua" class="action-button"><i class="fas fa-trash"></i> Clear</button>
+                    </div>
+                </div>
+                <div class="tab-content-inner lua-container">
+                    <div class="code-editor-container">
+                        <textarea id="lua-code" placeholder="-- Enter Lua code here
+-- Example:
+local vehicle = GetVehiclePedIsIn(PlayerPedId(), false)
+if vehicle ~= 0 then
+    local plate = GetVehicleNumberPlateText(vehicle)
+    return 'Vehicle plate: ' .. plate
+else
+    return 'Not in a vehicle'
+end"></textarea>
+                    </div>
+                    <div class="lua-result-container">
+                        <h3>Execution Result</h3>
+                        <pre id="lua-result">// Result will appear here</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teleport Tab -->
+            <div class="tab-content" id="teleport-tab">
+                <div class="tab-header">
+                    <h2>Teleport</h2>
+                </div>
+                <div class="tab-content-inner">
+                    <div class="current-location">
+                        <h3>Current Location</h3>
+                        <div class="coords-display" id="current-coords">
+                            X: 0.00 Y: 0.00 Z: 0.00 H: 0.00
+                        </div>
+                        <div class="coords-actions">
+                            <button id="copy-coords-vector3" class="action-button"><i class="fas fa-copy"></i> Copy as vector3</button>
+                            <button id="copy-coords-vector4" class="action-button"><i class="fas fa-copy"></i> Copy as vector4</button>
+                            <button id="copy-coords-table" class="action-button"><i class="fas fa-copy"></i> Copy as table</button>
+                        </div>
+                    </div>
+                    <div class="teleport-locations">
+                        <h3>Saved Locations</h3>
+                        <div class="locations-list" id="locations-list">
+                            <!-- Saved locations will be populated here -->
+                        </div>
+                    </div>
+                    <div class="custom-teleport">
+                        <h3>Custom Coordinates</h3>
+                        <div class="custom-coords">
+                            <div class="input-group">
+                                <label for="teleport-x">X:</label>
+                                <input type="text" id="teleport-x" placeholder="X Coordinate">
+                            </div>
+                            <div class="input-group">
+                                <label for="teleport-y">Y:</label>
+                                <input type="text" id="teleport-y" placeholder="Y Coordinate">
+                            </div>
+                            <div class="input-group">
+                                <label for="teleport-z">Z:</label>
+                                <input type="text" id="teleport-z" placeholder="Z Coordinate">
+                            </div>
+                            <div class="input-group">
+                                <label for="teleport-h">H:</label>
+                                <input type="text" id="teleport-h" placeholder="Heading (optional)">
+                            </div>
+                        </div>
+                        <div class="teleport-actions">
+                            <button id="teleport-to-coords" class="action-button"><i class="fas fa-map-marker-alt"></i> Teleport</button>
+                            <button id="save-current-location" class="action-button"><i class="fas fa-save"></i> Save Current Location</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Debug Tab -->
+            <div class="tab-content" id="debug-tab">
+                <div class="tab-header">
+                    <h2>Debug Tools</h2>
+                </div>
+                <div class="tab-content-inner">
+                    <div class="debug-toggles">
+                        <div class="toggle-group">
+                            <label class="toggle">
+                                <input type="checkbox" id="toggle-coordinates">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Show Coordinates</span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle">
+                                <input type="checkbox" id="toggle-heading">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Show Heading</span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle">
+                                <input type="checkbox" id="toggle-entity-info">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Show Entity Info</span>
+                            </label>
+                        </div>
+                        <div class="toggle-group">
+                            <label class="toggle">
+                                <input type="checkbox" id="toggle-server-info">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Show Server Info</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="debug-info">
+                        <div class="player-debug-info">
+                            <h3>Player Info</h3>
+                            <div id="player-debug-data">
+                                <!-- Player debug data will be populated here -->
+                            </div>
+                        </div>
+                        <div class="entity-debug-info">
+                            <h3>Entity Info</h3>
+                            <div id="entity-debug-data">
+                                <!-- Entity debug data will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resources Tab -->
+            <div class="tab-content" id="resources-tab">
+                <div class="tab-header">
+                    <h2>Resource Manager</h2>
+                    <div class="tab-actions">
+                        <input type="text" id="resource-search" placeholder="Search resources...">
+                        <button id="refresh-resources" class="action-button"><i class="fas fa-sync-alt"></i> Refresh</button>
+                    </div>
+                </div>
+                <div class="tab-content-inner">
+                    <div class="resources-list" id="resources-list">
+                        <table id="resources-table">
+                            <thead>
+                                <tr>
+                                    <th>Resource Name</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Resources will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div class="tab-content" id="logs-tab">
+                <div class="tab-header">
+                    <h2>Live Logs</h2>
+                    <div class="tab-actions">
+                        <select id="log-level">
+                            <option value="all">All Logs</option>
+                            <option value="info">Info</option>
+                            <option value="warning">Warning</option>
+                            <option value="error">Error</option>
+                            <option value="debug">Debug</option>
+                        </select>
+                        <button id="clear-logs" class="action-button"><i class="fas fa-trash"></i> Clear Logs</button>
+                        <button id="export-logs" class="action-button"><i class="fas fa-download"></i> Export</button>
+                    </div>
+                </div>
+                <div class="tab-content-inner">
+                    <div class="logs-container" id="logs-container">
+                        <!-- Logs will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="tab-content" id="settings-tab">
+                <div class="tab-header">
+                    <h2>Settings</h2>
+                    <div class="tab-actions">
+                        <button id="save-settings" class="action-button"><i class="fas fa-save"></i> Save Settings</button>
+                        <button id="reset-settings" class="action-button"><i class="fas fa-undo"></i> Reset to Default</button>
+                    </div>
+                </div>
+                <div class="tab-content-inner">
+                    <div class="settings-group">
+                        <h3>UI Settings</h3>
+                        <div class="setting-item">
+                            <label for="font-size">Font Size</label>
+                            <input type="range" id="font-size" min="10" max="20" value="14">
+                            <span id="font-size-value">14px</span>
+                        </div>
+                        <div class="setting-item">
+                            <label for="theme">Theme</label>
+                            <select id="theme">
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <label for="hotkey">Hotkey</label>
+                            <select id="hotkey">
+                                <option value="F2">F2</option>
+                                <option value="F3">F3</option>
+                                <option value="F4">F4</option>
+                                <option value="F5">F5</option>
+                                <option value="F6">F6</option>
+                                <option value="F7">F7</option>
+                                <option value="F8">F8</option>
+                                <option value="F9">F9</option>
+                            </select>
+                        </div>
+                        <div class="setting-item checkbox">
+                            <label>
+                                <input type="checkbox" id="show-clock" checked>
+                                <span>Show Clock</span>
+                            </label>
+                        </div>
+                        <div class="setting-item checkbox">
+                            <label>
+                                <input type="checkbox" id="animation" checked>
+                                <span>Enable Animations</span>
+                            </label>
+                        </div>
+                        <div class="setting-item checkbox">
+                            <label>
+                                <input type="checkbox" id="blur-background" checked>
+                                <span>Blur Background</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
